@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レーダーチャート - Radar Chart as a Service</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a2e 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-radius: 20px 0 0 20px;
+            padding: 30px 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 0 20px 20px 0;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #00ff88 0%, #00d9a3 50%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            position: relative;
+        }
+
+        .sidebar h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            border-radius: 2px;
+        }
+
+        .inputs-section {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .input-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background: white;
+            cursor: pointer;
+        }
+
+        .input-group select:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .input-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 8px 0;
+        }
+
+        .input-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            transition: all 0.2s;
+        }
+
+        .input-group input[type="range"]::-webkit-slider-thumb:hover {
+            background: #10b981;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
+            transform: scale(1.1);
+        }
+
+        .input-group input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            transition: all 0.2s;
+        }
+
+        .input-group input[type="range"]::-moz-range-thumb:hover {
+            background: #10b981;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
+            transform: scale(1.1);
+        }
+
+        #axisCountDisplay {
+            color: #10b981;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .axis-input {
+            display: grid;
+            grid-template-columns: 30px minmax(100px, 180px) 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .axis-label-text {
+            font-weight: 600;
+            color: #10b981;
+            font-size: 12px;
+        }
+
+        .axis-input input[type="text"] {
+            padding: 6px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: border-color 0.3s;
+        }
+
+        .axis-input input[type="text"]:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .compact-slider {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .compact-slider input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .compact-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+        }
+
+        .compact-slider input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            border: none;
+        }
+
+        .compact-value {
+            min-width: 24px;
+            text-align: center;
+            font-weight: 600;
+            color: #10b981;
+            font-size: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+                max-height: 50vh;
+            }
+
+            .main-content {
+                border-radius: 0 0 20px 20px;
+            }
+
+            .sidebar h1 {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .axis-input {
+                grid-template-columns: 25px 1fr;
+                gap: 10px;
+            }
+
+            .compact-slider {
+                grid-column: 2;
+            }
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider-group input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+        }
+
+        .slider-group input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+            color: #10b981;
+            font-size: 18px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 100%;
+            max-height: 80vh;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: #0f172a;
+            color: #00ff88;
+            border: 2px solid #10b981;
+        }
+
+        .btn-secondary:hover {
+            background: #1e293b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <h1>Radar Chart as a Service</h1>
+
+            <div class="sidebar-content">
+                <div class="inputs-section">
+                    <div class="input-group">
+                        <label for="axisCount">軸の数: <span id="axisCountDisplay">3</span></label>
+                        <input type="range" id="axisCount" min="3" max="6" step="1" value="3" oninput="updateAxisCountDisplay(); generateInputs();">
+                    </div>
+
+                    <div id="dynamicInputs"></div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn-primary" onclick="updateChart()">チャートを更新</button>
+                    <button class="btn-secondary" onclick="copyPermalink()">パーマリンクをコピー</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <div class="notification" id="notification">
+        URLをクリップボードにコピーしました！
+    </div>
+
+    <script>
+        let chart = null;
+        let debounceTimer = null;
+        const defaultLabels = ['友情', '努力', '勝利', '', '', ''];
+
+        // デバウンス関数（高速操作時の描画を制御）
+        function debounce(func, delay) {
+            return function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
+            };
+        }
+
+        // デバウンスされたチャート更新関数
+        const debouncedUpdateChart = debounce(updateChart, 300);
+
+        // 軸の数の表示を更新
+        function updateAxisCountDisplay() {
+            const count = document.getElementById('axisCount').value;
+            document.getElementById('axisCountDisplay').textContent = count;
+        }
+
+        // 入力フォームを動的に生成
+        function generateInputs() {
+            const count = parseInt(document.getElementById('axisCount').value);
+            const container = document.getElementById('dynamicInputs');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= count; i++) {
+                // コンパクトな1行入力
+                const axisInput = document.createElement('div');
+                axisInput.className = 'axis-input';
+                const placeholder = defaultLabels[i - 1] || `軸${i}`;
+                axisInput.innerHTML = `
+                    <span class="axis-label-text">軸${i}</span>
+                    <input type="text" id="label${i}" placeholder="${placeholder}">
+                    <div class="compact-slider">
+                        <input type="range" id="value${i}" min="1" max="3" value="1">
+                        <span class="compact-value" id="value${i}-display">1</span>
+                    </div>
+                `;
+                container.appendChild(axisInput);
+
+                // スライダーのイベントリスナー
+                setTimeout(() => {
+                    const slider = document.getElementById(`value${i}`);
+                    const display = document.getElementById(`value${i}-display`);
+
+                    slider.addEventListener('input', function() {
+                        display.textContent = this.value;
+                        debouncedUpdateChart();
+                    });
+                }, 0);
+            }
+
+            // デフォルト値を設定
+            loadDefaultValues(count);
+        }
+
+        // デフォルト値を読み込み
+        function loadDefaultValues(count) {
+            for (let i = 1; i <= count; i++) {
+                const labelInput = document.getElementById(`label${i}`);
+                if (labelInput && !labelInput.value && defaultLabels[i - 1]) {
+                    labelInput.value = defaultLabels[i - 1];
+                }
+            }
+        }
+
+        // URLクエリパラメータを解析
+        function parseQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            const count = params.get('count');
+            const labels = params.get('labels');
+            const values = params.get('values');
+
+            if (count) {
+                const countNum = parseInt(count);
+                if (countNum >= 3 && countNum <= 6) {
+                    document.getElementById('axisCount').value = countNum;
+                }
+            }
+
+            return { count, labels, values };
+        }
+
+        // URLパラメータから値を設定
+        function setValuesFromParams(labels, values) {
+            if (labels) {
+                const labelArray = labels.split(',');
+                labelArray.forEach((label, i) => {
+                    const input = document.getElementById(`label${i + 1}`);
+                    if (input) {
+                        input.value = decodeURIComponent(label);
+                    }
+                });
+            }
+
+            if (values) {
+                const valueArray = values.split(',');
+                valueArray.forEach((value, i) => {
+                    const val = parseInt(value);
+                    if (val >= 1 && val <= 3) {
+                        const slider = document.getElementById(`value${i + 1}`);
+                        if (slider) {
+                            slider.value = val;
+                            const display = document.getElementById(`value${i + 1}-display`);
+                            if (display) display.textContent = val;
+                        }
+                    }
+                });
+            }
+        }
+
+        // チャートを更新
+        function updateChart() {
+            const count = parseInt(document.getElementById('axisCount').value);
+            const labels = [];
+            const values = [];
+
+            for (let i = 1; i <= count; i++) {
+                const labelInput = document.getElementById(`label${i}`);
+                const valueInput = document.getElementById(`value${i}`);
+
+                labels.push(labelInput ? (labelInput.value || `軸${i}`) : `軸${i}`);
+                values.push(valueInput ? parseInt(valueInput.value) : 1);
+            }
+
+            const ctx = document.getElementById('radarChart').getContext('2d');
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'スコア',
+                        data: values,
+                        fill: true,
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        pointBackgroundColor: 'rgb(16, 185, 129)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(16, 185, 129)',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 3,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // パーマリンクをコピー
+        function copyPermalink() {
+            const count = parseInt(document.getElementById('axisCount').value);
+            const labels = [];
+            const values = [];
+
+            for (let i = 1; i <= count; i++) {
+                const labelInput = document.getElementById(`label${i}`);
+                const valueInput = document.getElementById(`value${i}`);
+
+                labels.push(labelInput ? (labelInput.value || `軸${i}`) : `軸${i}`);
+                values.push(valueInput ? valueInput.value : '1');
+            }
+
+            const labelsParam = labels.map(l => encodeURIComponent(l)).join(',');
+            const valuesParam = values.join(',');
+
+            const url = `${window.location.origin}${window.location.pathname}?count=${count}&labels=${labelsParam}&values=${valuesParam}`;
+
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification();
+            }).catch(err => {
+                console.error('コピーに失敗しました:', err);
+                alert('URLのコピーに失敗しました。手動でコピーしてください:\n' + url);
+            });
+        }
+
+        // 通知を表示
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ページ読み込み時の初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = parseQueryParams();
+
+            // 入力フォームを生成
+            generateInputs();
+
+            // URLパラメータから値を設定
+            setTimeout(() => {
+                setValuesFromParams(params.labels, params.values);
+                // 初期チャートを描画
+                updateChart();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
