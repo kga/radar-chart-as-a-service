@@ -6,6 +6,8 @@
     <title>レーダーチャート - Radar Chart as a Service</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=BBH+Hegarty&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -13,32 +15,46 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a2e 50%, #0f172a 100%);
-            min-height: 100vh;
+            font-family: 'BBH Hegarty', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            height: 100vh;
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .app-layout {
             display: flex;
-            min-height: 100vh;
+            height: calc(100vh - 40px);
             width: 100%;
             max-width: 1400px;
             margin: 0 auto;
         }
 
         .sidebar {
-            width: 350px;
-            background: white;
-            border-radius: 20px 0 0 20px;
-            padding: 30px 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 420px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-right: none;
+            border-radius: 24px 0 0 24px;
+            padding: 30px 25px;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar-content {
@@ -50,13 +66,17 @@
 
         .main-content {
             flex: 1;
-            background: white;
-            border-radius: 0 20px 20px 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-left: none;
+            border-radius: 0 24px 24px 0;
             padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
@@ -64,13 +84,9 @@
             margin-bottom: 20px;
             font-size: 22px;
             font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #00ff88 0%, #00d9a3 50%, #10b981 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            letter-spacing: 1px;
+            color: white;
+            text-shadow: 0 2px 20px rgba(255, 255, 255, 0.5);
             position: relative;
         }
 
@@ -87,7 +103,7 @@
             transform: translateX(-50%);
             width: 100px;
             height: 3px;
-            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
             border-radius: 2px;
         }
 
@@ -102,60 +118,75 @@
         .input-group label {
             display: block;
             margin-bottom: 5px;
-            color: #555;
+            color: rgba(255, 255, 255, 0.95);
             font-weight: 500;
             font-size: 13px;
         }
 
         .input-group input[type="text"] {
             width: 100%;
-            padding: 8px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .input-group input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .input-group input[type="text"]:focus {
             outline: none;
-            border-color: #10b981;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
         }
 
         .input-group select {
             width: 100%;
             padding: 8px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s;
-            background: white;
+            color: white;
+            transition: all 0.3s;
             cursor: pointer;
         }
 
         .input-group select:focus {
             outline: none;
-            border-color: #10b981;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
         }
 
         .input-group input[type="number"] {
             width: 100%;
             padding: 8px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            color: white;
+            transition: all 0.3s;
         }
 
         .input-group input[type="number"]:focus {
             outline: none;
-            border-color: #10b981;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
         }
 
         .input-group input[type="range"] {
             width: 100%;
             height: 6px;
             border-radius: 3px;
-            background: #e0e0e0;
+            background: rgba(255, 255, 255, 0.2);
             outline: none;
             -webkit-appearance: none;
             margin: 8px 0;
@@ -166,15 +197,14 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #00ff88;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 0 15px rgba(240, 147, 251, 0.6);
             transition: all 0.2s;
         }
 
         .input-group input[type="range"]::-webkit-slider-thumb:hover {
-            background: #10b981;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
+            box-shadow: 0 0 25px rgba(240, 147, 251, 0.8);
             transform: scale(1.1);
         }
 
@@ -182,23 +212,64 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #00ff88;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             cursor: pointer;
             border: none;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 0 15px rgba(240, 147, 251, 0.6);
             transition: all 0.2s;
         }
 
         .input-group input[type="range"]::-moz-range-thumb:hover {
-            background: #10b981;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
+            box-shadow: 0 0 25px rgba(240, 147, 251, 0.8);
             transform: scale(1.1);
         }
 
-        #axisCountDisplay {
-            color: #10b981;
+        .axis-count-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .axis-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .axis-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .axis-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .axis-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .axis-count-display {
+            min-width: 40px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.95);
             font-weight: 700;
-            font-size: 16px;
+            font-size: 24px;
         }
 
         .axis-input {
@@ -208,27 +279,36 @@
             align-items: center;
             margin-bottom: 8px;
             padding: 8px 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .axis-label-text {
             font-weight: 600;
-            color: #10b981;
+            color: rgba(255, 255, 255, 0.9);
             font-size: 12px;
         }
 
         .axis-input input[type="text"] {
-            padding: 6px 10px;
-            border: 2px solid #e0e0e0;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 6px;
-            font-size: 13px;
-            transition: border-color 0.3s;
+            font-size: 15px;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .axis-input input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .axis-input input[type="text"]:focus {
             outline: none;
-            border-color: #10b981;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
         }
 
         .compact-slider {
@@ -241,7 +321,7 @@
             flex: 1;
             height: 6px;
             border-radius: 3px;
-            background: #e0e0e0;
+            background: rgba(255, 255, 255, 0.2);
             outline: none;
             -webkit-appearance: none;
         }
@@ -252,24 +332,26 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: #10b981;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(240, 147, 251, 0.5);
         }
 
         .compact-slider input[type="range"]::-moz-range-thumb {
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: #10b981;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             cursor: pointer;
             border: none;
+            box-shadow: 0 0 10px rgba(240, 147, 251, 0.5);
         }
 
         .compact-value {
             min-width: 24px;
             text-align: center;
             font-weight: 600;
-            color: #10b981;
+            color: rgba(255, 255, 255, 0.95);
             font-size: 16px;
         }
 
@@ -280,12 +362,16 @@
 
             .sidebar {
                 width: 100%;
-                border-radius: 20px 20px 0 0;
+                border-radius: 24px 24px 0 0;
+                border-right: 1px solid rgba(255, 255, 255, 0.3);
+                border-bottom: none;
                 max-height: 50vh;
             }
 
             .main-content {
-                border-radius: 0 0 20px 20px;
+                border-radius: 0 0 24px 24px;
+                border-left: 1px solid rgba(255, 255, 255, 0.3);
+                border-top: none;
             }
 
             .sidebar h1 {
@@ -314,7 +400,7 @@
             flex: 1;
             height: 8px;
             border-radius: 5px;
-            background: #e0e0e0;
+            background: rgba(255, 255, 255, 0.2);
             outline: none;
             -webkit-appearance: none;
         }
@@ -325,24 +411,26 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #10b981;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             cursor: pointer;
+            box-shadow: 0 0 12px rgba(240, 147, 251, 0.5);
         }
 
         .slider-group input[type="range"]::-moz-range-thumb {
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #10b981;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             cursor: pointer;
             border: none;
+            box-shadow: 0 0 12px rgba(240, 147, 251, 0.5);
         }
 
         .slider-value {
             min-width: 30px;
             text-align: center;
             font-weight: 600;
-            color: #10b981;
+            color: rgba(255, 255, 255, 0.95);
             font-size: 18px;
         }
 
@@ -363,9 +451,10 @@
 
         button {
             width: 100%;
-            padding: 10px 18px;
+            padding: 12px 18px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
+            font-family: inherit;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -373,37 +462,41 @@
         }
 
         .btn-primary {
-            background: #10b981;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .btn-primary:hover {
-            background: #059669;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
         }
 
         .btn-secondary {
-            background: #0f172a;
-            color: #00ff88;
-            border: 2px solid #10b981;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .btn-secondary:hover {
-            background: #1e293b;
+            background: rgba(255, 255, 255, 0.15);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
         }
 
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #10b981;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
             padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             opacity: 0;
             transform: translateX(400px);
             transition: all 0.3s;
@@ -442,16 +535,21 @@
             <div class="sidebar-content">
                 <div class="inputs-section">
                     <div class="input-group">
-                        <label for="axisCount">軸の数: <span id="axisCountDisplay">3</span></label>
-                        <input type="range" id="axisCount" min="3" max="6" step="1" value="3" oninput="updateAxisCountDisplay(); generateInputs();">
+                        <label>Axes</label>
+                        <div class="axis-count-control">
+                            <button type="button" class="axis-btn" id="decreaseAxis" onclick="changeAxisCount(-1)">−</button>
+                            <span class="axis-count-display" id="axisCountDisplay">3</span>
+                            <button type="button" class="axis-btn" id="increaseAxis" onclick="changeAxisCount(1)">＋</button>
+                        </div>
+                        <input type="hidden" id="axisCount" value="3">
                     </div>
 
                     <div id="dynamicInputs"></div>
                 </div>
 
                 <div class="buttons">
-                    <button class="btn-primary" onclick="updateChart()">チャートを更新</button>
-                    <button class="btn-secondary" onclick="copyPermalink()">パーマリンクをコピー</button>
+                    <button class="btn-primary" onclick="updateChart()">Update Chart</button>
+                    <button class="btn-secondary" onclick="copyPermalink()">Copy Permalink</button>
                 </div>
             </div>
         </aside>
@@ -464,7 +562,7 @@
     </div>
 
     <div class="notification" id="notification">
-        URLをクリップボードにコピーしました！
+        URL copied to clipboard!
     </div>
 
     <script>
@@ -487,6 +585,33 @@
         function updateAxisCountDisplay() {
             const count = document.getElementById('axisCount').value;
             document.getElementById('axisCountDisplay').textContent = count;
+
+            // ボタンの有効/無効を更新
+            const decreaseBtn = document.getElementById('decreaseAxis');
+            const increaseBtn = document.getElementById('increaseAxis');
+
+            if (decreaseBtn && increaseBtn) {
+                decreaseBtn.disabled = (parseInt(count) <= 3);
+                increaseBtn.disabled = (parseInt(count) >= 6);
+            }
+        }
+
+        // 軸の数を変更
+        function changeAxisCount(delta) {
+            const axisCountInput = document.getElementById('axisCount');
+            let currentCount = parseInt(axisCountInput.value);
+            let newCount = currentCount + delta;
+
+            // 3〜6の範囲内に制限
+            if (newCount >= 3 && newCount <= 6) {
+                axisCountInput.value = newCount;
+                updateAxisCountDisplay();
+                generateInputs();
+                // チャートを再描画
+                setTimeout(() => {
+                    updateChart();
+                }, 50);
+            }
         }
 
         // 入力フォームを動的に生成
@@ -501,7 +626,7 @@
                 axisInput.className = 'axis-input';
                 const placeholder = defaultLabels[i - 1] || `軸${i}`;
                 axisInput.innerHTML = `
-                    <span class="axis-label-text">軸${i}</span>
+                    <span class="axis-label-text">#${i}</span>
                     <input type="text" id="label${i}" placeholder="${placeholder}">
                     <div class="compact-slider">
                         <input type="range" id="value${i}" min="1" max="3" value="1">
@@ -591,7 +716,7 @@
                 const labelInput = document.getElementById(`label${i}`);
                 const valueInput = document.getElementById(`value${i}`);
 
-                labels.push(labelInput ? (labelInput.value || `軸${i}`) : `軸${i}`);
+                labels.push(labelInput ? (labelInput.value || `Axis ${i}`) : `Axis ${i}`);
                 values.push(valueInput ? parseInt(valueInput.value) : 1);
             }
 
@@ -606,18 +731,18 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'スコア',
+                        label: 'Score',
                         data: values,
                         fill: true,
-                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                        borderColor: 'rgb(16, 185, 129)',
-                        pointBackgroundColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(118, 75, 162, 0.4)',
+                        borderColor: 'rgb(118, 75, 162)',
+                        pointBackgroundColor: 'rgb(118, 75, 162)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgb(16, 185, 129)',
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        borderWidth: 2
+                        pointHoverBorderColor: 'rgb(118, 75, 162)',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        borderWidth: 3
                     }]
                 },
                 options: {
@@ -630,11 +755,21 @@
                             max: 3,
                             ticks: {
                                 stepSize: 1,
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                backdropColor: 'transparent',
                                 font: {
-                                    size: 14
+                                    size: 14,
+                                    weight: '500'
                                 }
                             },
+                            grid: {
+                                color: 'rgba(118, 75, 162, 0.15)'
+                            },
+                            angleLines: {
+                                color: 'rgba(118, 75, 162, 0.2)'
+                            },
                             pointLabels: {
+                                color: 'rgba(0, 0, 0, 0.85)',
                                 font: {
                                     size: 16,
                                     weight: 'bold'
@@ -661,7 +796,7 @@
                 const labelInput = document.getElementById(`label${i}`);
                 const valueInput = document.getElementById(`value${i}`);
 
-                labels.push(labelInput ? (labelInput.value || `軸${i}`) : `軸${i}`);
+                labels.push(labelInput ? (labelInput.value || `Axis ${i}`) : `Axis ${i}`);
                 values.push(valueInput ? valueInput.value : '1');
             }
 
@@ -673,8 +808,8 @@
             navigator.clipboard.writeText(url).then(() => {
                 showNotification();
             }).catch(err => {
-                console.error('コピーに失敗しました:', err);
-                alert('URLのコピーに失敗しました。手動でコピーしてください:\n' + url);
+                console.error('Copy failed:', err);
+                alert('Failed to copy URL. Please copy manually:\n' + url);
             });
         }
 
@@ -694,11 +829,16 @@
             // 入力フォームを生成
             generateInputs();
 
+            // ボタンの初期状態を設定
+            updateAxisCountDisplay();
+
             // URLパラメータから値を設定
             setTimeout(() => {
                 setValuesFromParams(params.labels, params.values);
                 // 初期チャートを描画
                 updateChart();
+                // パラメータから読み込んだ後もボタンの状態を更新
+                updateAxisCountDisplay();
             }, 100);
         });
     </script>
